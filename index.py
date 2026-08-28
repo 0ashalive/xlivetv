@@ -4,13 +4,13 @@ import urllib.request
 
 # Dynamic playlist mapping (id -> source URL)
 PLAYLISTS = {
-"jio":"",
+"jio":"https://raw.githubusercontent.com/0ashalive/xlivetv/refs/heads/main/jbonio.m3u",
     
 }
 
 # Default playlist ID if none is provided in the URL query
-DEFAULT_PLAYLIST_ID = "z5"
-TELEGRAM_URL = "https://t.me/ashaott"
+DEFAULT_PLAYLIST_ID = "jio"
+TELEGRAM_URL = "https://t.me/bdtvlive"
 
 # Browsers to detect and redirect to Telegram
 BROWSER_USER_AGENTS = [
