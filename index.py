@@ -4,7 +4,9 @@ import urllib.request
 
 # Dynamic playlist mapping (id -> source URL)
 PLAYLISTS = {
-"jio":"https://raw.githubusercontent.com/0ashalive/xlivetv/refs/heads/main/jbonio.m3u",
+    "jio":"https://raw.githubusercontent.com/0ashalive/xlivetv/refs/heads/main/jbonio.m3u",
+    "bdix":"https://raw.githubusercontent.com/streamifytv/abbas/refs/heads/main/bd.m3u",
+    "jago":"https://m3u-tvb.pages.dev/Jjago.br.m3u8",
     
 }
 
