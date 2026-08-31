@@ -7,6 +7,7 @@ PLAYLISTS = {
     "jio":"https://raw.githubusercontent.com/0ashalive/xlivetv/refs/heads/main/jbonio.m3u",
     "bdix":"https://raw.githubusercontent.com/streamifytv/abbas/refs/heads/main/bd.m3u",
     "jago":"https://m3u-tvb.pages.dev/Jjago.br.m3u8",
+    "bdix2": "https://github.com/abusaeeidx/Mrgify-BDIX-IPTV/raw/main/playlist.m3u",
     
 }
 
