@@ -54,6 +54,7 @@ REMOVE_KEYWORDS = [
     "subscribe",
     "new app",
     "download app",
+    "Download Sportzfy TV",
     # নতুন কোনো কি-ওয়ার্ড বাদ দিতে চাইলে নিচে কমা (,) দিয়ে বসাবেন:
     # "another_keyword",
 ]
