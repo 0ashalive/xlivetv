@@ -48,36 +48,36 @@ REMOVE_URLS = [
 
 
 # ==============================================================================
-# 3. M3U CLEANING & DEDUPLICATION ENGINE
+# 3. STRICT M3U CLEANING & LINK DEDUPLICATION ENGINE
 # ==============================================================================
 def clean_m3u_content(raw_text: str) -> str:
     """
-    Parses M3U playlist data, removes targeted promo ads, and deduplicates channels.
+    Parses M3U playlist data line-by-line, filters promo ads, 
+    and strictly removes duplicate m3u8 streaming URLs.
     """
     lines = raw_text.splitlines()
     cleaned_lines = []
     
-    # Tracking sets to eliminate duplicate channels
-    seen_urls = set()
-    seen_titles = set()
+    # Track every unique stream URL (m3u8/ts/etc.) processed so far
+    seen_stream_urls = set()
     
     i = 0
     while i < len(lines):
         line = lines[i].strip()
         
-        # Detect start of entry block
+        # Detect start of an entry block (#EXTINF)
         if line.startswith("#EXTINF"):
-            extinf_line = lines[i]
             block = [lines[i]]
             i += 1
             
             stream_url = ""
-            # Collect full block (metadata tags + stream link)
+            # Group all tags, headers, and the stream URL for this block
             while i < len(lines) and not lines[i].strip().startswith("#EXTINF"):
                 block.append(lines[i])
-                curr_line = lines[i].strip()
-                if not curr_line.startswith("#") and curr_line != "":
-                    stream_url = curr_line
+                curr = lines[i].strip()
+                # Store the actual stream link line
+                if not curr.startswith("#") and curr != "":
+                    stream_url = curr
                     break
                 i += 1
             
@@ -86,36 +86,40 @@ def clean_m3u_content(raw_text: str) -> str:
             
             should_remove = False
 
-            # 1. Match against target keywords
+            # Check 1: Target keyword removal
             if any(kw.lower() in block_text_lower for kw in REMOVE_KEYWORDS if kw.strip()):
                 should_remove = True
 
-            # 2. Match against stream URLs or domains
+            # Check 2: Target ad/promo URL removal
             if not should_remove:
                 if any(url.lower() in block_text_lower for url in REMOVE_URLS if url.strip()):
                     should_remove = True
 
-            # 3. Deduplication Check (Removes double/duplicate channels)
+            # Check 3: Strict m3u8 Link Deduplication
             if not should_remove and stream_url:
-                # Extract title after the comma in #EXTINF line
-                channel_title = extinf_line.split(",")[-1].strip().lower() if "," in extinf_line else ""
-                
-                # If stream URL or exact channel title is already processed, strip duplicate
-                if stream_url.lower() in seen_urls or (channel_title and channel_title in seen_titles):
+                normalized_url = stream_url.lower()
+                # If this EXACT stream link was already added, drop this duplicate block
+                if normalized_url in seen_stream_urls:
                     should_remove = True
                 else:
-                    seen_urls.add(stream_url.lower())
-                    if channel_title:
-                        seen_titles.add(channel_title)
+                    seen_stream_urls.add(normalized_url)
 
-            # Retain block if clean and unique
+            # Keep block if it is clean and has a unique stream URL
             if not should_remove:
                 cleaned_lines.extend(block)
             continue
         
+        # Handle standalone stream links or header comments
         else:
             if line:
-                cleaned_lines.append(lines[i])
+                # If a standalone stream link appears without #EXTINF, deduplicate it too
+                if not line.startswith("#"):
+                    normalized_url = line.lower()
+                    if normalized_url not in seen_stream_urls:
+                        seen_stream_urls.add(normalized_url)
+                        cleaned_lines.append(lines[i])
+                else:
+                    cleaned_lines.append(lines[i])
             i += 1
 
     return "\n".join(cleaned_lines)
