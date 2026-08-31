@@ -35,7 +35,7 @@ MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc",
 # A. যেসব নির্দিষ্ট লিঙ্ক বা ডোমেইন মুছে ফেলতে চান:
 REMOVE_URLS = [
     "https://playztv.pages.dev/promo/master.m3u8",
-    "playztv.pages.dev",
+    
     "https://raw.githubusercontent.com/streamifytv/abbas/refs/heads/main/sportzfy.ts",
     "sportzfy.ts",
     "1000398131.png",
