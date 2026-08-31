@@ -25,7 +25,6 @@ PLAYLISTS = {
 DEFAULT_PLAYLIST_ID = "jio"
 TELEGRAM_URL = "https://t.me/bdtvlive"
 
-# User-Agent Verification Lists
 BROWSER_USER_AGENTS = ["mozilla", "chrome", "safari", "edge", "opera", "firefox"]
 MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc", "mxplayer"]
 
@@ -33,104 +32,108 @@ MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc",
 # 2. AUTOMATIC REMOVAL CONFIGURATION
 # ==============================================================================
 
-# A. 특정 লিঙ্ক বা ডোমেইন রিমুভ করার তালিকা (Add extra links/domains here)
+# A. যেসব নির্দিষ্ট লিঙ্ক বা ডোমেইন মুছে ফেলতে চান:
 REMOVE_URLS = [
     "https://playztv.pages.dev/promo/master.m3u8",
-    "https://raw.githubusercontent.com/streamifytv/abbas/refs/heads/main/sportzfy.ts",# Target Promo Stream
-                        # Domain match
-    "1000398131.png",  
-    "https://sportzfys.to/wp-content/uploads/2026/02/sportzfy-13.webp",# Promo Logo
-    # আরও লিঙ্ক বাদ দিতে নিচে কমা (,) দিয়ে যুক্ত করুন:
-    # "https://example.com/ad/stream.m3u8",
-    # "another-ad-domain.com",
+    "playztv.pages.dev",
+    "https://raw.githubusercontent.com/streamifytv/abbas/refs/heads/main/sportzfy.ts",
+    "sportzfy.ts",
+    "1000398131.png",
+    # নতুন কোনো লিঙ্ক বাদ দিতে চাইলে নিচে কমা (,) দিয়ে বসাবেন:
+    # "https://example.com/ad.m3u8",
 ]
 
-# B. চ্যানেল টাইটেল বা মেটাডেটার কি-ওয়ার্ড রিমুভ করার তালিকা
+# B. যেসব টেক্সট বা কি-ওয়ার্ড যুক্ত চ্যানেল/লাইন মুছে ফেলতে চান:
 REMOVE_KEYWORDS = [
     "welcome to playz tv",
     "playz tv",
+    "sportzfy",
     "promo",
     "advertisement",
     "join telegram",
     "subscribe",
     "new app",
     "download app",
-    "Download Sportzfy TV",
-    # আরও কি-ওয়ার্ড বাদ দিতে নিচে কমা (,) দিয়ে যুক্ত করুন:
-    # "ad_channel_name",
+    # নতুন কোনো কি-ওয়ার্ড বাদ দিতে চাইলে নিচে কমা (,) দিয়ে বসাবেন:
+    # "another_keyword",
 ]
 
 
 # ==============================================================================
-# 3. M3U CLEANING & LINK DEDUPLICATION ENGINE
+# 3. UNIVERSAL M3U CLEANING & DEDUPLICATION ENGINE
 # ==============================================================================
 def clean_m3u_content(raw_text: str) -> str:
     """
-    Parses raw M3U playlist data, filters out specified promo ads/links,
-    and automatically strips duplicate m3u8 stream URLs.
+    Parses M3U content and strictly filters out targeted URLs, keywords, 
+    standalone ad links (even without #EXTINF), and duplicates.
     """
     lines = raw_text.splitlines()
     cleaned_lines = []
-    
-    # Track unique stream URLs to avoid double entries
     seen_stream_urls = set()
     
     i = 0
     while i < len(lines):
         line = lines[i].strip()
         
-        # Detect start of entry block (#EXTINF)
+        if not line:
+            i += 1
+            continue
+
+        # ১. যদি লিঙ্ক বা লাইনে কোনো ফিল্টার কি-ওয়ার্ড/ইউআরএল থাকে তবে সরাসরি স্কিপ করবে
+        line_lower = line.lower()
+        if any(url.lower() in line_lower for url in REMOVE_URLS if url.strip()):
+            i += 1
+            continue
+        if any(kw.lower() in line_lower for kw in REMOVE_KEYWORDS if kw.strip()):
+            i += 1
+            continue
+
+        # ২. স্ট্যান্ডার্ড #EXTINF চ্যানেল ব্লক প্রসেস করা
         if line.startswith("#EXTINF"):
             block = [lines[i]]
             i += 1
             
             stream_url = ""
-            # Capture full channel block (tags, headers, and stream URL)
             while i < len(lines) and not lines[i].strip().startswith("#EXTINF"):
+                curr = lines[i].strip()
                 block.append(lines[i])
-                curr_line = lines[i].strip()
-                if not curr_line.startswith("#") and curr_line != "":
-                    stream_url = curr_line
+                if curr and not curr.startswith("#"):
+                    stream_url = curr
                     break
                 i += 1
             
-            block_text = "\n".join(block)
-            block_text_lower = block_text.lower()
+            block_text = "\n".join(block).lower()
             
             should_remove = False
 
-            # Check 1: Target Stream/Logo URL or Domain Removal
-            if any(url.lower() in block_text_lower for url in REMOVE_URLS if url.strip()):
+            # ব্লকের ভেতরে কোনো ফিল্টার লিঙ্ক বা কি-ওয়ার্ড আছে কি না চেক
+            if any(url.lower() in block_text for url in REMOVE_URLS if url.strip()):
                 should_remove = True
-
-            # Check 2: Target Keyword Removal
-            if not should_remove:
-                if any(kw.lower() in block_text_lower for kw in REMOVE_KEYWORDS if kw.strip()):
-                    should_remove = True
-
-            # Check 3: Strict m3u8 Link Deduplication
+            elif any(kw.lower() in block_text for kw in REMOVE_KEYWORDS if kw.strip()):
+                should_remove = True
+            
+            # ডুপ্লিকেট লিঙ্ক ফিল্টারিং
             if not should_remove and stream_url:
-                normalized_url = stream_url.lower()
-                if normalized_url in seen_stream_urls:
+                norm_url = stream_url.lower()
+                if norm_url in seen_stream_urls:
                     should_remove = True
                 else:
-                    seen_stream_urls.add(normalized_url)
+                    seen_stream_urls.add(norm_url)
 
-            # Retain block if clean and unique
             if not should_remove:
                 cleaned_lines.extend(block)
             continue
         
-        # Standalone stream links or comments handling
+        # ৩. Standalone URLs বা অন্যান্য ট্যাগের (যেমন #EXTVLCOPT) ফিল্টারিং
         else:
-            if line:
-                if not line.startswith("#"):
-                    normalized_url = line.lower()
-                    if normalized_url not in seen_stream_urls:
-                        seen_stream_urls.add(normalized_url)
-                        cleaned_lines.append(lines[i])
-                else:
-                    cleaned_lines.append(lines[i])
+            if not line.startswith("#"):
+                norm_url = line.lower()
+                if norm_url in seen_stream_urls:
+                    i += 1
+                    continue
+                seen_stream_urls.add(norm_url)
+            
+            cleaned_lines.append(lines[i])
             i += 1
 
     return "\n".join(cleaned_lines)
@@ -147,7 +150,6 @@ class handler(BaseHTTPRequestHandler):
         is_media_player = any(player in user_agent for player in MEDIA_PLAYER_AGENTS)
         is_browser = any(browser in user_agent for browser in BROWSER_USER_AGENTS)
 
-        # 1. Redirect standard web browsers to Telegram
         if is_browser and not is_media_player:
             self.send_response(302)
             self.send_header("Location", TELEGRAM_URL)
@@ -155,13 +157,11 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             return
 
-        # 2. Extract ?id= query parameter
         parsed_path = urllib.parse.urlparse(self.path)
         query_params = urllib.parse.parse_qs(parsed_path.query)
 
         playlist_id = query_params.get("id", [DEFAULT_PLAYLIST_ID])[0].lower()
 
-        # Handle missing key in PLAYLISTS dictionary
         if playlist_id not in PLAYLISTS:
             self.send_response(404)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
@@ -171,7 +171,6 @@ class handler(BaseHTTPRequestHandler):
 
         target_url = PLAYLISTS[playlist_id]
 
-        # 3. Request raw M3U playlist file content
         try:
             req = urllib.request.Request(
                 target_url,
@@ -183,10 +182,8 @@ class handler(BaseHTTPRequestHandler):
             with urllib.request.urlopen(req, timeout=15) as response:
                 m3u_content_raw = response.read().decode("utf-8", errors="ignore")
 
-            # Clean promo links and remove duplicate channels
             m3u_content_cleaned = clean_m3u_content(m3u_content_raw)
 
-            # 4. Output cleaned M3U data directly to media player
             self.send_response(200)
             self.send_header("Content-Type", "text/plain; charset=utf-8")
             self.send_header("Access-Control-Allow-Origin", "*")
@@ -200,3 +197,4 @@ class handler(BaseHTTPRequestHandler):
             self.end_headers()
             err_msg = f"#EXTM3U\n#ERROR: Failed to fetch target playlist: {str(e)}"
             self.wfile.write(err_msg.encode("utf-8"))
+            
