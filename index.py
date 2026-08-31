@@ -47,7 +47,6 @@ MEDIA_PLAYER_AGENTS = [
 # Keywords in channel names, group titles, or metadata to automatically filter out
 REMOVE_KEYWORDS = [
     "welcome to playz tv",
-    "promo",
     "advertisement",
     "join telegram",
     "subscribe",
