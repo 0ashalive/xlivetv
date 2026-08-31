@@ -23,7 +23,7 @@ MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc",
 # ১. যেসব কি-ওয়ার্ড, টাইটেল, গ্রুপ বা লিঙ্ক বাদ দিতে চান তা এখানে লিখে রাখুন:
 REMOVE_KEYWORDS = [
     "welcome to playz tv",
-    "https://playztv.pages.dev/promo/master.m3u8",
+    "playztv.pages.dev",
     "promo",
     "advertisement",
     "join telegram",
@@ -35,7 +35,7 @@ REMOVE_KEYWORDS = [
 
 # ২. আরও অ্যাডভান্সড ফিল্টারিং এর জন্য Regex Pattern (ঐচ্ছিক):
 REMOVE_REGEX_PATTERNS = [
-    r"https?://.*promo.*\.m3u8", # Promo m3u8 লিঙ্ক রিমুভ করার জন্য
+    r"https://playztv.pages.dev/promo/master.m3u8", # Promo m3u8 লিঙ্ক রিমুভ করার জন্য
 ]
 
 
