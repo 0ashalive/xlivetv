@@ -28,51 +28,38 @@ MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc",
 # ==============================================================================
 # 2. AUTOMATIC REMOVAL CONFIGURATION
 # ==============================================================================
-
-# Keywords in tvg-name, group-title, titles, or logos to filter out
 REMOVE_KEYWORDS = [
-    # Specific targeted block text
     "welcome to playz tv",
     "playz tv",
     "welcome to playz tv | new app",
-    "blogger.googleusercontent.com/img/b/r29vzgxl/avvxsegynikyw9puz1okx5bgzlaswgvsu p0e7hx9fxvtmjmhxhu8x0tpucgsplbzgm8pcyrjjh0p2_dtc1-wzp4mmuu4sknozghgpcwwdbyooa4jtyhpr7ydnj-uk-bc56imsk2h3wzj-szszik0dtpyabcfr2_zjc2_c86w1pv7odfbt_y-hyjs62g-3zcjkpgd",
-    
-    # Generic advertising and promo keywords
     "promo",
     "advertisement",
     "join telegram",
     "subscribe",
     "new app",
     "download app",
-
-    # Place additional title or metadata keywords to remove here:
-    # "another_ad_keyword",
 ]
 
-# Specific stream URLs, logo URLs, or host domains to filter out completely
 REMOVE_URLS = [
-    # Target stream link
     "https://playztv.pages.dev/promo/master.m3u8",
     "playztv.pages.dev",
-    
-    # Target logo URL pattern
     "1000398131.png",
-
-    # Place additional stream URLs or domain paths to remove here:
-    # "https://example.com/promo.m3u8",
 ]
 
 
 # ==============================================================================
-# 3. M3U CLEANING ENGINE
+# 3. M3U CLEANING & DEDUPLICATION ENGINE
 # ==============================================================================
 def clean_m3u_content(raw_text: str) -> str:
     """
-    Parses raw M3U playlist data line-by-line into discrete channel blocks.
-    If a block matches any REMOVE_KEYWORDS or REMOVE_URLS, it is dropped.
+    Parses M3U playlist data, removes targeted promo ads, and deduplicates channels.
     """
     lines = raw_text.splitlines()
     cleaned_lines = []
+    
+    # Tracking sets to eliminate duplicate channels
+    seen_urls = set()
+    seen_titles = set()
     
     i = 0
     while i < len(lines):
@@ -80,12 +67,17 @@ def clean_m3u_content(raw_text: str) -> str:
         
         # Detect start of entry block
         if line.startswith("#EXTINF"):
+            extinf_line = lines[i]
             block = [lines[i]]
             i += 1
+            
+            stream_url = ""
             # Collect full block (metadata tags + stream link)
             while i < len(lines) and not lines[i].strip().startswith("#EXTINF"):
                 block.append(lines[i])
-                if not lines[i].strip().startswith("#") and lines[i].strip() != "":
+                curr_line = lines[i].strip()
+                if not curr_line.startswith("#") and curr_line != "":
+                    stream_url = curr_line
                     break
                 i += 1
             
@@ -94,16 +86,29 @@ def clean_m3u_content(raw_text: str) -> str:
             
             should_remove = False
 
-            # Check 1: Match keywords in full block text (includes metadata & logo)
+            # 1. Match against target keywords
             if any(kw.lower() in block_text_lower for kw in REMOVE_KEYWORDS if kw.strip()):
                 should_remove = True
 
-            # Check 2: Match stream/logo URLs or hostnames
+            # 2. Match against stream URLs or domains
             if not should_remove:
                 if any(url.lower() in block_text_lower for url in REMOVE_URLS if url.strip()):
                     should_remove = True
 
-            # Retain block if clean
+            # 3. Deduplication Check (Removes double/duplicate channels)
+            if not should_remove and stream_url:
+                # Extract title after the comma in #EXTINF line
+                channel_title = extinf_line.split(",")[-1].strip().lower() if "," in extinf_line else ""
+                
+                # If stream URL or exact channel title is already processed, strip duplicate
+                if stream_url.lower() in seen_urls or (channel_title and channel_title in seen_titles):
+                    should_remove = True
+                else:
+                    seen_urls.add(stream_url.lower())
+                    if channel_title:
+                        seen_titles.add(channel_title)
+
+            # Retain block if clean and unique
             if not should_remove:
                 cleaned_lines.extend(block)
             continue
