@@ -23,7 +23,7 @@ MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc",
 # ১. যেসব কি-ওয়ার্ড, টাইটেল, গ্রুপ বা লিঙ্ক বাদ দিতে চান তা এখানে লিখে রাখুন:
 REMOVE_KEYWORDS = [
     "welcome to playz tv",
-    "playztv.pages.dev/promo",
+    "https://playztv.pages.dev/promo/master.m3u8",
     "promo",
     "advertisement",
     "join telegram",
