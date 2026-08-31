@@ -35,9 +35,11 @@ MEDIA_PLAYER_AGENTS = ["okhttp", "kodi", "iptv", "tivimate", "exoplayer", "vlc",
 
 # A. 특정 লিঙ্ক বা ডোমেইন রিমুভ করার তালিকা (Add extra links/domains here)
 REMOVE_URLS = [
-    "https://playztv.pages.dev/promo/master.m3u8", # Target Promo Stream
+    "https://playztv.pages.dev/promo/master.m3u8",
+    "https://raw.githubusercontent.com/streamifytv/abbas/refs/heads/main/sportzfy.ts",# Target Promo Stream
                         # Domain match
-    "1000398131.png",                              # Promo Logo
+    "1000398131.png",  
+    "https://sportzfys.to/wp-content/uploads/2026/02/sportzfy-13.webp",# Promo Logo
     # আরও লিঙ্ক বাদ দিতে নিচে কমা (,) দিয়ে যুক্ত করুন:
     # "https://example.com/ad/stream.m3u8",
     # "another-ad-domain.com",
@@ -53,6 +55,7 @@ REMOVE_KEYWORDS = [
     "subscribe",
     "new app",
     "download app",
+    "Download Sportzfy TV",
     # আরও কি-ওয়ার্ড বাদ দিতে নিচে কমা (,) দিয়ে যুক্ত করুন:
     # "ad_channel_name",
 ]
