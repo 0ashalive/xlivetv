@@ -13,7 +13,7 @@ PLAYLISTS = {
     "bdix2": "https://github.com/abusaeeidx/Mrgify-BDIX-IPTV/raw/main/playlist.m3u",
     
     # Additional Category Playlists
-    "bd_all": "https://raw.githubusercontent.com/m3u8playlist/bangladesh-iptv/main/bd.m3u",
+    "akashgo": "https://raw.githubusercontent.com/srhady/Hady/refs/heads/main/Bd_news.m3u?t=1788292557435",
     "sports": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/sports.m3u",
     "news": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/news.m3u",
     "movies": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/movies.m3u",
