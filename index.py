@@ -16,8 +16,8 @@ PLAYLISTS = {
     "entall": "https://bestiptvpro.pages.dev/All.m3u",
     "sports": "https://bestiptvpro.pages.dev/Sports.m3u",
     "fmradio": "https://bestiptvpro.pages.dev/FMRadio.m3u",
-    "music": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/music.m3u",
-    "entertainment": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/entertainment.m3u",
+    "music": "https://drive.usercontent.google.com/u/0/uc?id=1y7PPKjhnhDZktA_HQxXfQns_dZWJG5Er&export=download",
+    "257": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/entertainment.m3u",
     "animation": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/animation.m3u",
 }
 
