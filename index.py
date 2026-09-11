@@ -17,7 +17,7 @@ PLAYLISTS = {
     "sports": "https://bestiptvpro.pages.dev/Sports.m3u",
     "fmradio": "https://bestiptvpro.pages.dev/FMRadio.m3u",
     "music": "https://drive.usercontent.google.com/u/0/uc?id=1y7PPKjhnhDZktA_HQxXfQns_dZWJG5Er&export=download",
-    "257": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/entertainment.m3u",
+    "toffee": "https://tv9.workerbot-tv9.workers.dev/toffee.m3u",
     "animation": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/animation.m3u",
 }
 
