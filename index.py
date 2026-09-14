@@ -18,7 +18,7 @@ PLAYLISTS = {
     "fmradio": "https://bestiptvpro.pages.dev/FMRadio.m3u",
     "music": "https://drive.usercontent.google.com/u/0/uc?id=1y7PPKjhnhDZktA_HQxXfQns_dZWJG5Er&export=download",
     "toffee": "https://tv9.workerbot-tv9.workers.dev/toffee.m3u",
-    "animation": "https://raw.githubusercontent.com/iptv-org/iptv/master/streams/animation.m3u",
+    "adulex": "https://allplaylist.vercel.app/a.m3u",
 }
 
 DEFAULT_PLAYLIST_ID = "jio"
